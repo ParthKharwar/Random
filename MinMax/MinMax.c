@@ -1,115 +1,49 @@
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
+#define MAX 100
 
-void createfile(long n)
+void createarray(int x[], int n)
 {
-	long range, i;
-	FILE *list;
-	list = fopen("list.txt","w");
-	range = 50000;
+	int i, range;
+	range = 100;
 	for(i = 0; i < n; i++)
-		fprintf(list,"%ld\n",rand()%range);
-	fclose(list);
+  	{
+		x[i] = rand() % range;
+		printf("%d ",x[i]);
+  	}
+  	printf("\n");
 }
 
-void createarray(long a[], long n)
+void minmax(int x[], int i, int j, int *fmin, int *fmax)
 {
-	long i;
-	FILE *read;
-	read = fopen("list.txt","r");
-	for(i = 0;i < n; i++)
-		fscanf(read,"%ld",&a[i]);
-	fclose(read);
-}
-
-void merge(long x[], long lb, long ub, long m)
-{
-	long temp[50000], i = lb, j = m + 1, k = 0;
-	while(i <= m && j <= ub)
+	int c, m, gmax, gmin, hmax, hmin;
+	if (i == j)
 	{
-		if(x[i] < x[j])
-		      temp[k++] = x[i++];
-		else  temp[k++] = x[j++];
+		*fmin = *fmax = x[i];
+		return;
 	}
-	while(i <= m)
-        	temp[k++]=x[i++];
-	while(j <= ub)
-        	temp[k++]=x[j++];
-	k = 0;
-	for(i = lb; i <= ub; i++)
-		x[i] = temp[k++];
-}
-
-void merge_sort(long x[], long lb, long ub)
-{
-	long m;
-	if(lb < ub)
+	if (i == j-1)
 	{
-		m = (lb + ub) / 2;
-		merge_sort(x, lb, m);
-		merge_sort(x, m + 1, ub);
-		merge(x, lb, ub, m);
+		*fmin = x[i] < x[j] ? x[i] : x[j];
+		*fmax = x[i] > x[j] ? x[i] : x[j];
+		return;
 	}
-}
-
-long partition(long x[], long lb, long ub)
-{
-	long val = x[lb], down = lb, up = ub, t;
-	while(down < up)
-	{
-		while(down <= up && x[down] <= val)
-			down++;
-		while(x[up] > val)
-			up--;
-		if(down < up)
-		{
-			t = x[down];
-			x[down] = x[up];
-			x[up] = t;
-		}
-	}
-	x[lb] = x[up];
-	x[up] = val;
-	return up;
-}
-
-void quicksort(long x[], long lb, long ub)
-{
-	long p;
-	if(lb < ub)
-	{
-		p = partition(x, lb, ub);
-		quicksort(x, lb, p - 1);
-		quicksort(x, p + 1, ub);
-	}
+	m = i + j;
+	m /= 2;
+	minmax(x, i, m, &gmin, &gmax);
+	minmax(x, m+1, j, &hmin, &hmax);
+	*fmin = hmin < gmin ? hmin : gmin;
+	*fmax = hmax > gmax ? hmax : gmax;
+	return;
 }
 
 void main()
 {
-	clock_t t;
-	int i;
-	long x[50000], n;
-	double time;
-	FILE *op;
-	op = fopen("list.txt", "w");
-	int no[5] = {10000,20000,30000,40000,50000};
-	for(i=0; i<5; i++)
-	{
-	    n = no[i];
-	  	createfile(n);
-	  	createarray(x,n);
-	  	t = clock();
-	  	quicksort(x, 0, n-1);
-		//merge_sort(x, 0, n-1);
-	  	t =  clock()-t;
-	  	time = t;
-	  	time /= CLOCKS_PER_SEC;
-	  	time *= 1000;
-		  	printf("\n%ld : %lf ms", n, time);
-	 }
-	for(i = 0; i < n; i++)
-		fprintf(op, "%ld\n", x[i]);
-	fclose(op);
-	printf("\n");
+	int x[MAX], n, rmin, rmax;
+	printf("Enter No. of Elements: ");
+	scanf("%d", &n);
+	createarray(x, n);
+	minmax(x, 0, n-1, &rmin, &rmax);
+	printf("Minimum: %d\n", rmin);
+	printf("Maximum: %d\n", rmax);
 }
